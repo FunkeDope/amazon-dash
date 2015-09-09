@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "node-gyp": "^3.0.1",
     "node-pushover": "^0.2.2",
     "pcap": "^2.0.1",
     "request": "^2.61.0"
