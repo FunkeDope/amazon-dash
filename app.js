@@ -1,32 +1,13 @@
-var express = require('express');
-var request = require('request');
-var app = express();
-
-app.get('/', function (req, res) {
-    res.send('Your IP is: ' + req.ip);
-    console.log('Ping from: ' + req.ip);
-});
-
-var server = app.listen(3000, function () {
-    var host = server.address().address;
-    var port = server.address().port;
-
-    console.log('Example app listening at http://%s:%s', host, port);
-});
-
-
-
-
-
+//this file contains user names, pw's, api keys, and api tokens for some of the various APIs.
+//either make your own credential file or just comment this out and fill in your api keys where needed
+var creds = require('./creds');
 
 var DASH_MAC = '74:c2:46:02:1c:72',
     DASH_IP = '10.1.10.85';
 
-
 var pcap = require("pcap"),
     pcap_session = pcap.createSession("eth0", "arp"),
     timeStamp = 0;
-
 
 console.log("Listening on " + pcap_session.device_name);
 
@@ -52,23 +33,40 @@ pcap_session.on('packet', function (raw_packet) {
             dashButtonPress();
         }
     }
-    
-    
 });
-
 
 
 function dashButtonPress() {
     'use strict';
     console.log('pressed!');
-    //pushOver();
-    
-    sendTxt();
+    pushOver();
+    //sendTxt();
+    //sendEmail();
+}
+
+function sendEmail() {
+    'use strict';
+    console.log('Sending Email');
+    var nodemailer = require('nodemailer');
+    var transporter = nodemailer.createTransport({
+        host: 'smtp.mandrillapp.com',
+        port: 25,
+        auth: {
+            user: creds.mandrill.user,
+            pass: creds.mandrill.pass
+        }
+    });
+    transporter.sendMail({
+        from: '1337HAX0RZ@CORNERSTONEDISCOVERY.COM',
+        to: 'kyle5077@gmail.com;jsilva@cornerstonediscovery.com;gwalters@cornerstonediscovery.com;bstofik@cornerstonediscovery.com',
+        subject: 'YOUVE BEEN HACKED',
+        html: '<img src="http://i.imgur.com/BWyVN3m.gif" style="width:800px" /><br><br><sm>I MEAN REPROGRAMMED!</sm>'
+    });
 }
 
 function sendTxt() {
     'use strict';
-    
+    console.log('Sending text');
     request({
         url: 'http://textbelt.com/text',
         method: "POST",
@@ -81,35 +79,32 @@ function sendTxt() {
             console.log(body);
         }
         else {
-
             console.log("error: " + error);
             console.log("response.statusCode: " + response.statusCode);
             console.log("response.statusText: " + response.statusText);
         }
     });
-    
 }
 
 //send a push notification to pushover
 function pushOver() {
     'use strict';
+    console.log('Sending push notification');
     var Pushover = require('node-pushover');
     var push = new Pushover({
-        token: "akRJWSxpkF48Q6f84SzfUu4Yy7op2R",
-        user: "uQMofiXKyCG1kfoB39gq8iBZB5mg4Y"
+        token: creds.pushOver.token,
+        user: creds.pushOver.user
     });
-
-    // No callback function defined:
-    //push.send("Some title", "Node.js is Cool!! - no callback");
 
     // A callback function is defined:
     push.send("AmazonDash", "Button pressed.", function (err, res){
-        if(err){
+        if(err) {
             console.log("We have an error:");
             console.log(err);
             console.log(err.stack);
-        }else{
-            console.log("Message send successfully");
+        }
+        else {
+            console.log("Message sent successfully");
             console.log(res);
         }
     });

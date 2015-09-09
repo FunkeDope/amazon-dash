@@ -8,9 +8,6 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "express": "^4.13.3"
-  },
   "devDependencies": {
     "node-pushover": "^0.2.2",
     "pcap": "^2.0.1",
