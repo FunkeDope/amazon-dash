@@ -4,23 +4,23 @@ var creds = require('./creds');
 
 const DASH_MAC = '74:c2:46:02:1c:72',
     DASH_IP = '10.1.10.85',
-    INTERFACE = 'wlan0', //'eth0';
+    INTERFACE = 'eth0', //'eth0';
     DEV_MODE = true; //SPACEBAR emulates a button press
 
 var pcap = require("pcap"),
-    pcap_session = pcap.createSession(INTERFACE, "arp"),
+    pcapSession = pcap.createSession(INTERFACE, "arp"),
     timeStamp = 0;
 
-console.log("Listening on " + pcap_session.device_name);
+console.log("Listening on " + pcapSession.device_name);
 
 //normalize mac
 DASH_MAC.toLowerCase();
 
-pcap_session.on('packet', function (raw_packet) {
+pcapSession.on('packet', function (raw_packet) {
     'use strict';
     var packet = pcap.decode.packet(raw_packet),
         device = packet.payload.payload.sender_ha.toString().toLowerCase();
-
+    // UNCOMMENT TO LOG ALL ARP REQUESTS //
     /*console.log('--------- NEW ARP -------------');
     console.log('sender_ha: ' + packet.payload.payload.sender_ha);
     console.log('sender_pa: ' + packet.payload.payload.sender_pa);
@@ -41,9 +41,53 @@ pcap_session.on('packet', function (raw_packet) {
 function dashButtonPress() {
     'use strict';
     console.log('pressed!');
-    pushOver();
+    sendTweet();
+    //pushOver();
     //sendTxt();
     //sendEmail();
+}
+
+function sendTweet() {
+    'use strict';
+    var Twitter = require('twitter');
+    var client = new Twitter({
+        consumer_key: creds.twitter.consumerKey,
+        consumer_secret: creds.twitter.consumerSecret,
+        access_token_key: creds.twitter.accessToken,
+        access_token_secret: creds.twitter.accessSecret
+    });
+    
+    //get all tweets by user
+    /*var params = {screen_name: 'FunkeDope'};
+    client.get('statuses/user_timeline', params, function(error, tweets, response) {
+        if(!error) {
+            console.log(tweets);
+        }
+    });*/
+    
+    //stream all tweets matching 'track' var
+    /*client.stream('statuses/filter', {track: '#amazondash'}, function(stream) {
+        stream.on('data', function(tweet) {
+            console.log(tweet.text);
+        });
+        
+        stream.on('error', function(error) {
+            throw error;
+        });
+    });*/
+    
+    //tweet something
+    var status = 'I want Pizza! #AMAZONDASH';
+    client.post('statuses/update', {status: status},  function(error, tweet, response){
+        if(error) {
+            console.log(error);
+            throw error;
+        }
+        else {
+            //console.log(tweet);  // Tweet body. 
+            console.log('Tweet sent: "' + status + '"');
+        }
+    });
 }
 
 function sendEmail() {
@@ -120,7 +164,8 @@ if(DEV_MODE === true) {
     keypress(process.stdin);
     // listen for the "keypress" event
     process.stdin.on('keypress', function (ch, key) {
-        if(key && key.ctrl && key.name == 'c') {
+        'use strict';
+        if(key && key.ctrl && key.name === 'c') {
             process.exit();
          }
          else if(key && key.name === 'space') {

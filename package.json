@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "keypress": "^0.2.1",
     "node-gyp": "^3.0.1",
     "node-pushover": "^0.2.2",
     "pcap": "^2.0.1",
-    "request": "^2.61.0"
+    "request": "^2.61.0",
+    "twitter": "^1.2.5"
   }
 }
